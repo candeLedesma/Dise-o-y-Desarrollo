@@ -1,4 +1,4 @@
-package dyds.tvseriesinfo.fulllogic;
+package fulllogic;
 
 import java.sql.*;
 import java.util.ArrayList;
