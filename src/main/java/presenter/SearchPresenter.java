@@ -19,4 +19,5 @@ public interface SearchPresenter {
 
     void showAllRatedSeries();
 
+    boolean isRated(String title);
 }

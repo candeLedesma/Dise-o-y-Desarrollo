@@ -8,10 +8,17 @@ public class RatedSeries {
 
     private String lastUpdated;
 
+    private static boolean isRated;
+
     public RatedSeries(String title, int rating, String lastUpdated) {
         this.title = title;
         this.rating = rating;
         this.lastUpdated = lastUpdated;
+        this.isRated = false;
+    }
+
+    public static boolean isRated(String title) {
+        return isRated;
     }
 
     public String getTitle() {
@@ -28,6 +35,7 @@ public class RatedSeries {
 
     public void setRating(int rating) {
         this.rating = rating;
+        isRated = true;
     }
 
     public String getLastUpdated() {

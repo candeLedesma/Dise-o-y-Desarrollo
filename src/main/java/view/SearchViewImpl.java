@@ -22,7 +22,8 @@ public class SearchViewImpl implements SearchView {
     private JComboBox storedSeriesComboBox;
     private JTextPane storedInfoTextPane;
     private JPanel ratedSeriespanel;
-    private JList ratedSeriesList;
+    private JList<String> ratedSeriesList;
+    private JSlider ratingSlider;
 
     DefaultComboBoxModel<String> comboBoxModel = new DefaultComboBoxModel<>();
     String selectedResultTitle = null; //For storage purposes, it may not coincide with the searched term (see below)
@@ -119,16 +120,28 @@ public class SearchViewImpl implements SearchView {
             System.out.println("TYPED!!!");
         });
 
-        // From here on is where the magic happends: querying wikipedia, showing results, etc.
-        searchButton.addActionListener(e ->  { searchPresenter.searchSeries();});
+        searchButton.addActionListener(e -> searchPresenter.searchSeries());
 
         saveLocallyButton.addActionListener(actionEvent -> {
-            if(text != ""){
-                // save to DB  <o/
+            if (!text.isEmpty()) {
                 DataBaseImp.saveInfo(selectedResultTitle.replace("'", "`"), text);
                 storedSeriesComboBox.setModel(new DefaultComboBoxModel(DataBaseImp.getTitles().stream().sorted().toArray()));
             }
         });
+
+        ratingSlider.setMinimum(1);
+        ratingSlider.setMaximum(10);
+        ratingSlider.setMajorTickSpacing(1);
+        ratingSlider.setPaintTicks(true);
+        ratingSlider.setPaintLabels(true);
+
+        ratingSlider.addChangeListener(e -> {
+            if (!ratingSlider.getValueIsAdjusting()) {
+                searchPresenter.saveRating(); // Save the rating when the slider value is changed
+            }
+        });
+
+        searchPanel.add(ratingSlider, BorderLayout.SOUTH); // Adjust layout as needed
     }
 
 
@@ -152,18 +165,23 @@ public class SearchViewImpl implements SearchView {
     @Override
     public void showResults(LinkedList<SearchResult> results) {
         JPopupMenu searchOptionsMenu = new JPopupMenu("Search Results");
-        for(SearchResult searchResult : results){
-            searchResult.addActionListener(actionEvent -> {
-                System.out.println("Mostrando resultados "+ searchResult.title);
+        for (SearchResult searchResult : results) {
+            boolean isRated = searchPresenter.isRated(searchResult.title); // Método para verificar calificación
+            String menuText = (isRated ? "⭐ " : "") + searchResult.title; // Prefijo visual
+
+            JMenuItem menuItem = new JMenuItem(menuText);
+            menuItem.addActionListener(actionEvent -> {
+                System.out.println("Mostrando resultados: " + searchResult.title);
                 selectedResultTitle = searchResult.title;
                 searchPresenter.getSelectedExtract(searchResult);
-
+                searchPresenter.loadRating(); // Actualizar JSlider con la puntuación
             });
-            searchOptionsMenu.add(searchResult);
-            searchOptionsMenu.show(searchResultsTextPane, searchResultsTextPane.getX(), searchResultsTextPane.getY());
+            searchOptionsMenu.add(menuItem);
         }
+        searchOptionsMenu.show(searchResultsTextPane, searchResultsTextPane.getX(), searchResultsTextPane.getY());
         setWatingStatus();
     }
+
 
     @Override
     public void setSearchResultTextPane(String text) {
@@ -184,23 +202,27 @@ public class SearchViewImpl implements SearchView {
 
     @Override
     public void showRating(int rating) {
-
-
+        ratingSlider.setValue(rating);
     }
 
     @Override
     public int getRatingInput() {
-        return 0;
+        return ratingSlider.getValue();
     }
 
     @Override
     public void showRatedSeries(List<RatedSeries> ratedSeries) {
-        DefaultListModel<RatedSeries> listModel = new DefaultListModel<>();
+        DefaultListModel<String> listModel = new DefaultListModel<>();
         for (RatedSeries series : ratedSeries) {
-            listModel.addElement(series);
+            String displayText = String.format("%s - Rating: %d (Last updated: %s)",
+                    series.getTitle(), series.getRating(), series.getLastUpdated());
+            listModel.addElement(displayText);
         }
-        ratedSeriespanel.add(new JList<>(listModel));
+        ratedSeriesList.setModel(listModel);
+        ratedSeriespanel.revalidate();
+        ratedSeriespanel.repaint();
     }
+
 
     @Override
     public void setSelectSavedComboBox(Object[] savedTitles) {

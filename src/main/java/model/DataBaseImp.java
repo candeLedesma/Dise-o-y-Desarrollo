@@ -323,4 +323,39 @@ public class DataBaseImp {
     }
     return ratedSeries;
   }
+
+  public static RatedSeries getSerie(String title) {
+    Connection connection = null;
+    try
+    {
+      // create a database connection
+      connection = DriverManager.getConnection("jdbc:sqlite:./dictionary.db");
+      Statement statement = connection.createStatement();
+      statement.setQueryTimeout(30);  // set timeout to 30 sec.
+
+      ResultSet rs = statement.executeQuery("select * from catalog WHERE title = '" + title + "'" );
+      rs.next();
+      return new RatedSeries(rs.getString("title"), rs.getInt("extract"), "");
+    }
+    catch(SQLException e)
+    {
+      // if the error message is "out of memory",
+      // it probably means no database file is found
+      System.err.println("Get title error " + e.getMessage());
+    }
+    finally
+    {
+      try
+      {
+        if(connection != null)
+          connection.close();
+      }
+      catch(SQLException e)
+      {
+        // connection close failed.
+        System.err.println(e);
+      }
+    }
+    return null;
+  }
 }

@@ -143,6 +143,7 @@ public class SearchModelImp implements SearchModel {
     @Override
     public void saveRating(String title, int rating) {
         DataBaseImp.saveRating(title, rating);
+        DataBaseImp.getSerie(title).setRating(rating);
     }
 
     @Override
@@ -153,5 +154,9 @@ public class SearchModelImp implements SearchModel {
     @Override
     public List<RatedSeries> getAllRatedSeries() {
         return DataBaseImp.getAllRatedSeries();
+    }
+
+    public boolean isRated(String title) {
+        return RatedSeries.isRated(title);
     }
 }
