@@ -11,4 +11,12 @@ public interface SearchPresenter {
     void deleteStoredInfo();
 
     void saveStoredInfo();
+
+    //for new functionality
+    void saveRating();
+
+    void loadRating();
+
+    void showAllRatedSeries();
+
 }

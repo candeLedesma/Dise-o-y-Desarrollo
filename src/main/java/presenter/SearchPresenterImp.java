@@ -1,6 +1,6 @@
 package presenter;
 
-import fulllogic.DataBase;
+import model.DataBaseImp;
 import fulllogic.SearchResult;
 import model.SearchModelImp;
 import view.SearchViewImpl;
@@ -25,7 +25,7 @@ public class SearchPresenterImp implements SearchPresenter {
         view = new SearchViewImpl(this);
         view.showView();
 
-        DataBase.loadDatabase();
+        DataBaseImp.loadDatabase();
     }
 
 
@@ -65,5 +65,31 @@ public class SearchPresenterImp implements SearchPresenter {
             String text = view.getSearchResultTextPane();
             model.saveStoredInfo(title, text);
         }
+    }
+
+    @Override
+    public void saveRating() {
+        if (view.existSavedTitle()) {
+            String title = view.getSeletedSavedTitle();
+            int rating = view.getRatingInput();
+            model.saveRating(title, rating);
+        }
+
+    }
+
+    @Override
+    public void loadRating() {
+        if (view.existSavedTitle()) {
+            String title = view.getSeletedSavedTitle();
+            int rating = model.getRating(title);
+            view.showRating(rating);
+        }
+
+    }
+
+    @Override
+    public void showAllRatedSeries() {
+        view.showRatedSeries(model.getAllRatedSeries());
+
     }
 }

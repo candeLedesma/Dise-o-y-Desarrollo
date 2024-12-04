@@ -4,19 +4,16 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import fulllogic.DataBase;
 import fulllogic.SearchResult;
 import model.API.WikipediaPageAPI;
 import model.API.WikipediaSearchAPI;
+import presenter.SearchPresenter;
 import presenter.SearchPresenterImp;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static utils.TextoHTML.textToHtml;
 
@@ -41,10 +38,6 @@ public class SearchModelImp implements SearchModel {
         gson = new Gson();
     }
 
-    public void setPresenter(SearchPresenterImp searchPresenter) {
-        this.searchPresenter = searchPresenter;
-    }
-
     @Override
     public LinkedList<SearchResult> searchSeries(String seriesName) {
 
@@ -58,12 +51,6 @@ public class SearchModelImp implements SearchModel {
             //Show the result for testing reasons, if it works,
             System.out.println("JSON " + callForSearchResponse.body());
 
-            //ToAlberto: Very Important Comment 1
-            //This is the code parses the string with the search results for the query
-            //The string uses the JSON format to the describe the query and the results
-            //So we will use the Google library for JSONs (Gson) for its parsing and manipulation
-            //Basically, we will turn the string into a JSON object,
-            //With such object we can acceses to its fields using get(fieldname) method provided by Gson
             JsonObject jobj = gson.fromJson(callForSearchResponse.body(), JsonObject.class);
             JsonObject query = jobj.get("query").getAsJsonObject();
             Iterator<JsonElement> resultIterator = query.get("search").getAsJsonArray().iterator();
@@ -135,16 +122,36 @@ public class SearchModelImp implements SearchModel {
 
     @Override
     public void deleteSavedInfo(String title) {
-        DataBase.deleteEntry(title);
+        DataBaseImp.deleteEntry(title);
     }
 
     @Override
     public Object[] getSavedTitles() {
-        return DataBase.getTitles().stream().sorted().toArray();
+        return DataBaseImp.getTitles().stream().sorted().toArray();
     }
 
     @Override
     public void saveStoredInfo(String title, String text) {
-        DataBase.saveInfo(title, text);
+        DataBaseImp.saveInfo(title, text);
+    }
+
+    @Override
+    public void setPresenter(SearchPresenter presenter) {
+        this.searchPresenter = (SearchPresenterImp) presenter;
+    }
+
+    @Override
+    public void saveRating(String title, int rating) {
+        DataBaseImp.saveRating(title, rating);
+    }
+
+    @Override
+    public int getRating(String title) {
+        return DataBaseImp.getRating(title);
+    }
+
+    @Override
+    public List<RatedSeries> getAllRatedSeries() {
+        return DataBaseImp.getAllRatedSeries();
     }
 }

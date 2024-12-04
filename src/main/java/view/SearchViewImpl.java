@@ -1,11 +1,13 @@
 package view;
-import fulllogic.DataBase;
+import model.DataBaseImp;
 import fulllogic.SearchResult;
+import model.RatedSeries;
 import presenter.SearchPresenterImp;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.LinkedList;
+import java.util.List;
 
 public class SearchViewImpl implements SearchView {
     private final SearchPresenterImp searchPresenter;
@@ -14,11 +16,13 @@ public class SearchViewImpl implements SearchView {
     private JPanel contentPane;
     private JTextPane searchResultsTextPane;
     private JButton saveLocallyButton;
-    private JTabbedPane tabbedPane1;
+    private JTabbedPane textPaneRatedSeries;
     private JPanel searchPanel;
     private JPanel storagePanel;
     private JComboBox storedSeriesComboBox;
     private JTextPane storedInfoTextPane;
+    private JPanel ratedSeriespanel;
+    private JList ratedSeriesList;
 
     DefaultComboBoxModel<String> comboBoxModel = new DefaultComboBoxModel<>();
     String selectedResultTitle = null; //For storage purposes, it may not coincide with the searched term (see below)
@@ -43,6 +47,11 @@ public class SearchViewImpl implements SearchView {
         setSavedPanel();
 
 
+
+        searchPresenter.showAllRatedSeries(); // Load and display rated series
+
+        setRatedSeriesPanel();
+
         try {
             // Set System L&F
             UIManager.put("nimbusSelection", new Color(247,248,250));
@@ -64,6 +73,10 @@ public class SearchViewImpl implements SearchView {
 
     }
 
+    private void setRatedSeriesPanel() {
+        ratedSeriespanel.add(new JScrollPane(ratedSeriesList), BorderLayout.CENTER);
+        textPaneRatedSeries.addTab("Rated Series", ratedSeriespanel);
+    }
     private void setSavedPanel() {
 
         setComboBox();
@@ -96,7 +109,7 @@ public class SearchViewImpl implements SearchView {
     }
 
     private void setComboBox() {
-       storedSeriesComboBox.setModel(new DefaultComboBoxModel(DataBase.getTitles().stream().sorted().toArray()));
+       storedSeriesComboBox.setModel(new DefaultComboBoxModel(DataBaseImp.getTitles().stream().sorted().toArray()));
     }
 
     private void setSearchPanel() {
@@ -112,8 +125,8 @@ public class SearchViewImpl implements SearchView {
         saveLocallyButton.addActionListener(actionEvent -> {
             if(text != ""){
                 // save to DB  <o/
-                DataBase.saveInfo(selectedResultTitle.replace("'", "`"), text);
-                storedSeriesComboBox.setModel(new DefaultComboBoxModel(DataBase.getTitles().stream().sorted().toArray()));
+                DataBaseImp.saveInfo(selectedResultTitle.replace("'", "`"), text);
+                storedSeriesComboBox.setModel(new DefaultComboBoxModel(DataBaseImp.getTitles().stream().sorted().toArray()));
             }
         });
     }
@@ -167,6 +180,26 @@ public class SearchViewImpl implements SearchView {
     @Override
     public String getSeletedSavedTitle() {
         return (String) storedSeriesComboBox.getSelectedItem();
+    }
+
+    @Override
+    public void showRating(int rating) {
+
+
+    }
+
+    @Override
+    public int getRatingInput() {
+        return 0;
+    }
+
+    @Override
+    public void showRatedSeries(List<RatedSeries> ratedSeries) {
+        DefaultListModel<RatedSeries> listModel = new DefaultListModel<>();
+        for (RatedSeries series : ratedSeries) {
+            listModel.addElement(series);
+        }
+        ratedSeriespanel.add(new JList<>(listModel));
     }
 
     @Override
