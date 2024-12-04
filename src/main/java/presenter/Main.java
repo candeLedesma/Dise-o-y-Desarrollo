@@ -1,11 +1,11 @@
 package presenter;
 
-import model.SearchModel;
+import model.SearchModelImp;
 
 public class Main {
     public static void main(String[] args) {
-        SearchModel model = new SearchModel();
-        SearchPresenter presenter = new SearchPresenter(model);
+        SearchModelImp model = new SearchModelImp();
+        SearchPresenterImp presenter = new SearchPresenterImp(model);
         presenter.start();
     }
 }
